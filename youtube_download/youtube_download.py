@@ -8,6 +8,7 @@ from __future__ import print_function
 import os
 import cv2
 import pytube
+import time
 
 from absl import app
 from absl import flags
@@ -56,6 +57,7 @@ def main(argv):
         continue
 
       streams = pytube.YouTube(video_url).streams
+      import pdb; pdb.set_trace()
       video = streams.filter(type='video', subtype='mp4', res='%dp' % FLAGS.resolution).first()
       logging.info('%s', repr(video))
       audio = streams.filter(type='audio', subtype='mp4').first()
@@ -64,14 +66,14 @@ def main(argv):
       tmp_path = os.path.join(FLAGS.tmp_path, link['name'])
       if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
-
+      import pdb; pdb.set_trace()
       video_file_name = youtube_id +'_video'
       logging.info('download video to %s/%s.mp4', tmp_path, video_file_name)
-      # video.download(output_path=tmp_path, filename=video_file_name)
+      video.download(output_path=tmp_path, filename=video_file_name)
       logging.info('video download done')
       audio_file_name = youtube_id +'_audio'
       logging.info('download audio to %s/%s.mp4', tmp_path, audio_file_name)
-      # audio.download(output_path=tmp_path, filename=audio_file_name)
+      audio.download(output_path=tmp_path, filename=audio_file_name)
       logging.info('audio download done')
 
       logging.info('merge video audio')
@@ -84,11 +86,14 @@ def main(argv):
       cmd = ('ffmpeg -y -i %s -i %s -c:a copy %s' %
              (video_file_name, audio_file_name, final_file_name))
       logging.info('%s', cmd)
-      # os.system(cmd)
+      os.system(cmd)
 
       with open(success_file_name, 'w') as handle:
         handle.write('success')
       logging.info('success download %s to %s', video_url, final_file_name)
+
+      logging.info('wait 10 mintues')
+      time.sleep(600)
 
 
 if __name__ == '__main__':
